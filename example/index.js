@@ -3,9 +3,10 @@
 /* initializing mongodb */
 
 const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 const dbhost = process.env.DB_HOST || 'localhost:27017';
 const dbname = process.env.DB_NAME || 'testdb';
-const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`);
+const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`, { useMongoClient: true });
 
 /* defining polymorphic model with support for cron */
 
@@ -22,7 +23,7 @@ let reminderSchema = new mongoose.Schema({
 });
 
 noteSchema.plugin(cronPlugin, {
-  handler: doc => console.log('processing', doc.id)
+  handler: doc => console.log('processing', doc.name)
 });
 
 let Note = db.model('Note', noteSchema);
