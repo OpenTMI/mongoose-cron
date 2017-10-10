@@ -36,17 +36,17 @@ let cron = Note.createCron().start();
 
 /* sedding */
 
-Checklist.findOneAndUpdate({_id: '565781bba17d0e685f8e2086'}, {
+Checklist.create({
   name: 'Job 1',
   description: 'ignored by the cron heartbit'
-}, {upsert: true, setDefaultsOnInsert: true, new: true}).then(res => {}).catch(console.log);
+}).then(res => {}).catch(console.log);
 
-Reminder.findOneAndUpdate({_id: '565781bba17d0e685f8e2087'}, {
+Reminder.create({
   name: 'Job 2',
-  description: 'remined me every 1s',
+  description: 'remind me every 1s',
   cron: {
     enabled: true,
     startAt: new Date(),
     interval: '* * * * * *'
   }
-}, {upsert: true, setDefaultsOnInsert: true, new: true}).then(res => {}).catch(console.log);
+}).then(res => {}).catch(console.log);
