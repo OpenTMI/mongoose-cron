@@ -6,6 +6,10 @@ MongooseCron is build on top of [MongoDB](https://www.mongodb.org) and [Mongoose
 
 <img src="giphy.gif" />
 
+## Related
+
+* [mongodb-cron](https://github.com/xpepermint/mongodb-cron): MongoDB collection as crontab, using the officially supported [Node.js driver for MongoDB](https://docs.mongodb.com/ecosystem/drivers/node-js/).
+
 ## Setup
 
 ```
@@ -138,3 +142,7 @@ model.create({
 ## Example
 
 You can run the attached example with the `npm run example` command.
+
+## Alternatives
+
+There is a very similar package called [mongodb-cron](https://github.com/xpepermint/mongodb-cron), which uses the [officially supported Node.js driver](https://docs.mongodb.com/ecosystem/drivers/node-js/) for MongoDB.
