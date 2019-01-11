@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const dbhost = process.env.DB_HOST || 'localhost:27017';
 const dbname = process.env.DB_NAME || 'testdb';
-const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`, { useMongoClient: true });
+const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`, { useNewUrlParser: true });
 
 /* defining polymorphic model with support for cron */
 
@@ -26,7 +26,7 @@ noteSchema.plugin(cronPlugin, {
   handler: doc => console.log('processing', doc.name)
 });
 
-let Note = db.model('Note', noteSchema);
+let Note = mongoose.model('Note', noteSchema);
 let Checklist = Note.discriminator('Checklist', checklistSchema);
 let Reminder = Note.discriminator('Reminder', reminderSchema);
 
@@ -38,7 +38,7 @@ let cron = Note.createCron().start();
 
 Checklist.create({
   name: 'Job 1',
-  description: 'ignored by the cron heartbit'
+  description: 'ignored by the cron heartbeat'
 }).then(res => {}).catch(console.log);
 
 Reminder.create({
