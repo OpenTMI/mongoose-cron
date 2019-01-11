@@ -1,6 +1,6 @@
 {
   "name": "mongoose-cron",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "MongoDB collection as crontab",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xpepermint/mongoose-cron.git"
+    "url": "git+https://github.com/opentmi/mongoose-cron.git"
   },
   "keywords": [
     "mongoose",
@@ -26,16 +26,18 @@
     "repeated",
     "collection"
   ],
-  "author": "Xpepermint",
+  "author": "jupe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xpepermint/mongoose-cron/issues"
+    "url": "https://github.com/opentmi/mongoose-cron/issues"
   },
-  "homepage": "https://github.com/xpepermint/mongoose-cron#readme",
+  "homepage": "https://github.com/opentmi/mongoose-cron#readme",
   "devDependencies": {},
   "dependencies": {
-    "later": "1.2.0",
-    "moment": "2.15.1",
-    "mongoose": "4.6.1"
+    "later": "^1.2.0",
+    "moment": "^2.20.1"
+  },
+  "peerDependencies": {
+    "mongoose": "^5.4.1"
   }
 }
