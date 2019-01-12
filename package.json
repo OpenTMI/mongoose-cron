@@ -1,15 +1,16 @@
 {
   "name": "mongoose-cron",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "MongoDB collection as crontab",
   "main": "index.js",
   "scripts": {
-    "example": "node --harmony --harmony-destructuring example/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "example": "node example/index.js",
+    "test": "NODE_ENV=test istanbul cover -- _mocha --recursive -R spec test",
+    "lint": "eslint lib test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xpepermint/mongoose-cron.git"
+    "url": "git+https://github.com/opentmi/mongoose-cron.git"
   },
   "keywords": [
     "mongoose",
@@ -26,16 +27,29 @@
     "repeated",
     "collection"
   ],
-  "author": "Xpepermint",
+  "author": "jupe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xpepermint/mongoose-cron/issues"
+    "url": "https://github.com/opentmi/mongoose-cron/issues"
   },
-  "homepage": "https://github.com/xpepermint/mongoose-cron#readme",
-  "devDependencies": {},
+  "homepage": "https://github.com/opentmi/mongoose-cron#readme",
+  "devDependencies": {
+    "bluebird": "^3.5.3",
+    "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
+    "eslint": "^5.12.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0",
+    "mocha-circleci-reporter": "0.0.3",
+    "mongoose": "^5.4.3",
+    "sinon": "^7.2.2"
+  },
   "dependencies": {
-    "later": "1.2.0",
-    "moment": "2.15.1",
-    "mongoose": "4.6.1"
+    "cron-parser": "^2.4.2",
+    "later": "^1.2.0",
+    "moment": "^2.20.1"
+  },
+  "peerDependencies": {
+    "mongoose": "^5.4.1"
   }
 }

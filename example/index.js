@@ -3,9 +3,10 @@
 /* initializing mongodb */
 
 const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 const dbhost = process.env.DB_HOST || 'localhost:27017';
 const dbname = process.env.DB_NAME || 'testdb';
-const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`);
+const db = mongoose.connect(`mongodb://${dbhost}/${dbname}`, { useNewUrlParser: true });
 
 /* defining polymorphic model with support for cron */
 
@@ -22,10 +23,10 @@ let reminderSchema = new mongoose.Schema({
 });
 
 noteSchema.plugin(cronPlugin, {
-  handler: doc => console.log('processing', doc.id)
+  handler: doc => console.log('processing', doc.name)
 });
 
-let Note = db.model('Note', noteSchema);
+let Note = mongoose.model('Note', noteSchema);
 let Checklist = Note.discriminator('Checklist', checklistSchema);
 let Reminder = Note.discriminator('Reminder', reminderSchema);
 
@@ -35,17 +36,17 @@ let cron = Note.createCron().start();
 
 /* sedding */
 
-Checklist.findOneAndUpdate({_id: '565781bba17d0e685f8e2086'}, {
+Checklist.create({
   name: 'Job 1',
-  description: 'ignored by the cron heartbit'
-}, {upsert: true, setDefaultsOnInsert: true, new: true}).then(res => {}).catch(console.log);
+  description: 'ignored by the cron heartbeat'
+}).then(res => {}).catch(console.log);
 
-Reminder.findOneAndUpdate({_id: '565781bba17d0e685f8e2087'}, {
+Reminder.create({
   name: 'Job 2',
-  description: 'remined me every 1s',
+  description: 'remind me every 1s',
   cron: {
     enabled: true,
     startAt: new Date(),
     interval: '* * * * * *'
   }
-}, {upsert: true, setDefaultsOnInsert: true, new: true}).then(res => {}).catch(console.log);
+}).then(res => {}).catch(console.log);
