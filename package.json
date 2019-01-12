@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "example": "node example/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,11 @@
     "url": "https://github.com/opentmi/mongoose-cron/issues"
   },
   "homepage": "https://github.com/opentmi/mongoose-cron#readme",
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "sinon": "^7.2.2"
+  },
   "dependencies": {
     "cron-parser": "^2.4.2",
     "later": "^1.2.0",
