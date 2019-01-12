@@ -52,9 +52,10 @@ describe('mongoose-cron', function () {
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
             return task.save()
                 .then(() => waitNextTick())
+                .then(() => waitNextTick())
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
-                    expect(doc.name).to.be.equal('a');
+                    expect(doc).to.be.ok;
                     expect(doc.cron.enabled).to.be.true;
                     expect(handler.callCount).to.be.equal(1);
                 });
