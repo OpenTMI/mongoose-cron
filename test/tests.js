@@ -65,6 +65,7 @@ describe('mongoose-cron', function () {
                     expect(doc.name).to.be.equal('a');
                     return pendingError;
                 })
+                .then(() => Promise.delay(1000))
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     console.log(doc);
@@ -89,6 +90,7 @@ describe('mongoose-cron', function () {
                     expect(doc.name).to.be.equal('a');
                     return pendingError;
                 })
+                .then(() => Promise.delay(1000))
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     expect(doc.cron.lastError).to.be.equal('rejected');
