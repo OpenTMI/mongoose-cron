@@ -62,6 +62,7 @@ describe('mongoose-cron', function () {
             cron = Task.createCron({handler}).start();
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
             return task.save()
+                .then(() => Promise.delay(100))
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     expect(doc.cron.processedCount).to.be.equal(0);
