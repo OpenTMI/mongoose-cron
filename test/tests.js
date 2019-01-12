@@ -45,17 +45,34 @@ describe('mongoose-cron', function () {
         const waitTaskErrorEvent = () => waitTaskEvent('mongoose-cron:error');
 
         it('task is executed', function () {
-            let handler;
-            const promise = new Promise(resolve => { handler = resolve; });
+            let handler = sinon.stub();
             cron = Task.createCron({handler}).start();
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
             return task.save()
-                .then(() => promise)
                 .then(() => waitNextTick())
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     expect(doc.name).to.be.equal('a');
                     expect(doc.cron.enabled).to.be.true;
+                    expect(handler.callCount).to.be.equal(1);
+                });
+        });
+        it('long task is executed', function () {
+            let handler = sinon.stub().callsFake(() => Promise.delay(1000));
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
+            return task.save()
+                .then(() => Task.findOne({name: 'a'}))
+                .then((doc) => {
+                    expect(doc.cron.processedCount).to.be.equal(0);
+                    expect(doc.cron.processing).to.be.true;
+                })
+                .then(() => waitNextTick())
+                .then(() => Task.findOne({name: 'a'}))
+                .then((doc) => {
+                    expect(doc.cron.processedCount).to.be.equal(1);
+                    expect(doc.cron.processing).to.be.false;
+                    expect(handler.callCount).to.be.equal(1);
                 });
         });
         it('one time job', function () {
