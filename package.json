@@ -34,11 +34,13 @@
   },
   "homepage": "https://github.com/opentmi/mongoose-cron#readme",
   "devDependencies": {
+    "bluebird": "^3.5.3",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "eslint": "^5.12.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
+    "mongoose": "^5.4.3",
     "sinon": "^7.2.2"
   },
   "dependencies": {
