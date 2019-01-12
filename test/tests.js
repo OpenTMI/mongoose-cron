@@ -47,6 +47,8 @@ describe('mongoose-cron', function () {
         it('task is executed', function () {
             let handler = sinon.stub();
             cron = Task.createCron({handler}).start();
+            expect(cron.start()).to.be.equal(cron);
+            expect(cron.isRunning()).to.be.true;
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
             return task.save()
                 .then(() => waitNextTick())
