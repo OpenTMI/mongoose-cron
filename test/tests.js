@@ -1,7 +1,6 @@
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
 const {expect} = require('chai');
-const sinon = require('sinon');
 
 const CronPlugin = require('../lib/plugin');
 
@@ -68,7 +67,7 @@ describe('mongoose-cron', function () {
                 })
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
-                    console.log(doc)
+                    console.log(doc);
                     expect(doc.cron.lastError).to.be.equal('ohhoh');
                     // expect(doc.cron.enabled).to.be.undefined; // whaat, why enabled = true?
                 });
