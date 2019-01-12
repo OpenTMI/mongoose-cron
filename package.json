@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "example": "node example/index.js",
-    "test": "mocha test"
+    "test": "NODE_ENV=test istanbul cover -- _mocha --recursive -R spec test",
+    "lint": "eslint lib test"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,9 @@
   "homepage": "https://github.com/opentmi/mongoose-cron#readme",
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
+    "eslint": "^5.12.0",
+    "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "sinon": "^7.2.2"
   },
