@@ -40,9 +40,7 @@ describe('mongoose-cron', function () {
         afterEach(function () {
             return Task.deleteMany({});
         });
-        const waitTaskEvent = (event) => {
-            return new Promise((resolve) => Task.once(event, resolve));
-        };
+        const waitTaskEvent = (event) => new Promise((resolve) => Task.once(event, resolve));
         const waitNextTick = () => waitTaskEvent('mongoose-cron:nextTick');
         const waitTaskErrorEvent = () => waitTaskEvent('mongoose-cron:error');
 
@@ -73,8 +71,8 @@ describe('mongoose-cron', function () {
                 .then(() => waitNextTick())
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
-                    expect(handler.callCount).to.be.equal(2);
-                    expect(doc.cron.processedCount).to.be.equal(2);
+                    expect(handler.callCount).to.be.at.least(2);
+                    expect(doc.cron.processedCount).to.be.at.least(2);
                 });
         });
         it('document processing should not start before `startAt`', function () {
