@@ -47,7 +47,7 @@ We can now create our first job.
 ```js
 Task.create({
   cron: {
-    enabled: true,
+    enabled: true, // default
     startAt: new Date('2015-12-12'),
     stopAt: new Date('2016-12-12'),
     interval: '* * * * * *' // run every second
@@ -138,6 +138,17 @@ model.create({
   }
 });
 ```
+
+document contains also number of processed tasks
+```json
+cron: {
+    ...
+    processedCount: 0,
+    prcessedDuration: 0
+}
+```
+
+`processedDuration` is virtual getter, calculated from startedAt and processedAt
 
 ## Example
 

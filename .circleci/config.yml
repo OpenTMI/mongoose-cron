@@ -48,12 +48,3 @@ jobs:
       - store_artifacts:
           path: coverage
           prefix: coverage
-      - store_artifacts:
-          path: shippable/testresults
-          prefix: testresults
-      - store_artifacts:
-          path: db.log
-          prefix: mongolog
-      - store_artifacts:
-          path: log
-          prefix: logs

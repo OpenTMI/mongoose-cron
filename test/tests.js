@@ -58,6 +58,20 @@ describe('mongoose-cron', function () {
                     expect(doc.cron.enabled).to.be.true;
                 });
         });
+        it('one time job', function () {
+            let handler;
+            const promise = new Promise(resolve => { handler = resolve; });
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a'});
+            return task.save()
+                .then(() => promise)
+                .then(() => waitNextTick())
+                .then(() => Task.findOne({name: 'a'}))
+                .then((doc) => {
+                    expect(doc.name).to.be.equal('a');
+                    expect(doc.cron.enabled).to.be.false;
+                });
+        });
         it('document with `interval` should run repeatedly', function () {
             let handler = sinon.stub();
             cron = Task.createCron({handler}).start();
