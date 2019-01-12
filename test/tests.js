@@ -1,5 +1,7 @@
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
+const sinon = require('sinon');
+const moment = require('moment');
 const {expect} = require('chai');
 
 const CronPlugin = require('../lib/plugin');
@@ -11,7 +13,7 @@ describe('mongoose-cron', function () {
     const testDbName = 'mongoose-cron-test';
 
     before(function () {
-        return mongoose.connect(`mongodb://localhost:27017/${testDbName}`)
+        return mongoose.connect(`mongodb://localhost:27017/${testDbName}`, { useNewUrlParser: true })
             .then((res) => { db = res; });
     });
     before('drop db', (done) => mongoose.connection.db.dropDatabase(done));
@@ -35,19 +37,92 @@ describe('mongoose-cron', function () {
         afterEach(function () {
             cron.stop();
         });
-        it('handler is executed', function () {
+        afterEach(function () {
+            return Task.deleteMany({});
+        });
+        const waitTaskEvent = (event) => {
+            return new Promise((resolve) => Task.once(event, resolve));
+        };
+        const waitNextTick = () => waitTaskEvent('mongoose-cron:nextTick');
+        const waitTaskErrorEvent = () => waitTaskEvent('mongoose-cron:error');
+
+        it('task is executed', function () {
             let handler;
             const promise = new Promise(resolve => { handler = resolve; });
             cron = Task.createCron({handler}).start();
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
             return task.save()
-                .then(() => {
-                    // console.log(doc);
-                })
                 .then(() => promise)
+                .then(() => waitNextTick())
+                .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     expect(doc.name).to.be.equal('a');
+                    expect(doc.cron.enabled).to.be.true;
                 });
+        });
+        it('document with `interval` should run repeatedly', function () {
+            let handler = sinon.stub();
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
+            return task.save()
+                .then(() => waitNextTick())
+                .then(() => {
+                    expect(handler.callCount).to.be.equal(1);
+                })
+                .then(() => Promise.delay(1000))
+                .then(() => waitNextTick())
+                .then(() => Task.findOne({name: 'a'}))
+                .then((doc) => {
+                    expect(handler.callCount).to.be.equal(2);
+                    expect(doc.cron.processedCount).to.be.equal(2);
+                });
+        });
+        it('document processing should not start before `startAt`', function () {
+            let handler = sinon.stub();
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a',
+                'cron.startAt': moment().add(1, 'seconds').toDate(),
+                'cron.interval': '* * * * * *'
+            });
+            return task.save()
+                .then(() => waitNextTick())
+                .then(() => waitNextTick())
+                .then(() => {
+                    expect(handler.callCount).to.be.equal(0);
+                })
+                .then(() => Promise.delay(1000))
+                .then(() => waitNextTick())
+                .then(() => {
+                    expect(handler.callCount).to.be.equal(1);
+                });
+        });
+        it('condition should filter lockable documents', function () {
+            let handler = sinon.stub();
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a',
+                'cron.locked': true,
+                'cron.interval': '* * * * * *'
+            });
+            return task.save()
+                .then(() => waitNextTick())
+                .then(() => waitNextTick())
+                .then(() => {
+                    expect(handler.callCount).to.be.equal(0);
+                });
+        });
+        it('task can be disabled', function () {
+            let handler;
+            const promise = new Promise(resolve => { handler = resolve; });
+            cron = Task.createCron({handler}).start();
+            const task = new Task({name: 'a', 'cron.enabled': false, 'cron.interval': '* * * * * *'});
+            return task.save()
+                .then(() => waitNextTick())
+                .then(() => waitNextTick())
+                .then(() => promise.timeout(10)
+                    .reflect()
+                    .then((promise) => {
+                        expect(promise.isRejected()).to.be.true;
+                    }));
         });
         it('handler can throw', function () {
             let resolver;
@@ -58,19 +133,18 @@ describe('mongoose-cron', function () {
             };
             cron = Task.createCron({handler}).start();
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
-            const pendingError = new Promise((resolve) => Task.once('mongoose-cron:error', resolve));
+            const pendingError = waitTaskErrorEvent();
             return task.save()
                 .then(() => promise)
                 .then((doc) => {
                     expect(doc.name).to.be.equal('a');
                     return pendingError;
                 })
-                .then(() => Promise.delay(1000))
+                .then(() => waitNextTick())
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
-                    console.log(doc);
                     expect(doc.cron.lastError).to.be.equal('ohhoh');
-                    // expect(doc.cron.enabled).to.be.undefined; // whaat, why enabled = true?
+                    expect(doc.cron.enabled).to.be.undefined;
                 });
         });
 
@@ -83,18 +157,43 @@ describe('mongoose-cron', function () {
             };
             cron = Task.createCron({handler}).start();
             const task = new Task({name: 'a', 'cron.interval': '* * * * * *'});
-            const pendingError = new Promise((resolve) => Task.once('mongoose-cron:error', resolve));
+            const pendingError = waitTaskErrorEvent();
             return task.save()
                 .then(() => promise)
                 .then((doc) => {
                     expect(doc.name).to.be.equal('a');
                     return pendingError;
                 })
-                .then(() => Promise.delay(1000))
+                .then(() => waitNextTick())
                 .then(() => Task.findOne({name: 'a'}))
                 .then((doc) => {
                     expect(doc.cron.lastError).to.be.equal('rejected');
-                    // expect(doc.cron.enabled).to.be.undefined; // whaat, why enabled = true?
+                    expect(doc.cron.enabled).to.be.undefined;
+                });
+        });
+        it('document with `removeExpired` should be deleted after stopAt', function () {
+            this.timeout(5000);
+            let handler;
+            const promise = new Promise(resolve => { handler = resolve; });
+            cron = Task.createCron({handler}).start();
+            const task = new Task({
+                name: 'a',
+                cron: {
+                    stopAt: moment().add(500, 'ms').toDate(),
+                    removeExpired: true,
+                    interval: '* * * * * *'
+                }});
+            return task.save()
+                .then(() => waitNextTick())
+                .then(() => promise)
+                .then((doc) => {
+                    expect(doc.name).to.be.equal('a');
+                })
+                .then(() => Promise.delay(500))
+                .then(() => waitNextTick())
+                .then(() => Task.findOne({name: 'a'}))
+                .then((doc) => {
+                    expect(doc).to.be.null;
                 });
         });
     });
