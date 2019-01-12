@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/OpenTMI/mongoose-cron/tree/master.svg?style=svg)](https://circleci.com/gh/OpenTMI/mongoose-cron/tree/master)
+
 # [mongoose](http://mongoosejs.com)-cron
 
 > MongoDB collection as crontab
